@@ -1,0 +1,17 @@
+{
+  "name": "Speedtwin Moto",
+  "short_name": "Speedtwin",
+  "description": "Atelier moto multimarque à Marseille - BMW, KTM, Ducati",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "assets/img/logo-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 120" role="img" aria-label="Speedtwin">
+  <defs>
+    <linearGradient id="stWhite" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#d6d6d6"/>
+    </linearGradient>
+    <linearGradient id="stRed" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff1f1f"/>
+      <stop offset="1" stop-color="#b30000"/>
+    </linearGradient>
+  </defs>
+  <g font-family="'Bebas Neue','Oswald','Arial Narrow',sans-serif" font-weight="700" letter-spacing="2">
+    <text x="20" y="78" font-size="64" font-style="italic" fill="url(#stWhite)" transform="skewX(-12)">SPEED</text>
+    <text x="225" y="78" font-size="64" font-style="italic" fill="url(#stWhite)" transform="skewX(-12)">TWIN</text>
+  </g>
+  <g transform="translate(0,0)">
+    <path d="M 200 36 L 232 36 L 222 56 L 190 56 Z" fill="url(#stRed)"/>
+    <path d="M 195 64 L 220 64 L 212 80 L 187 80 Z" fill="url(#stRed)" opacity="0.85"/>
+    <path d="M 190 88 L 208 88 L 202 100 L 184 100 Z" fill="url(#stRed)" opacity="0.6"/>
+  </g>
+  <rect x="20" y="100" width="440" height="3" fill="url(#stWhite)" opacity="0.7"/>
+  <text x="312" y="115" font-family="'Inter','Helvetica Neue',sans-serif" font-size="10" letter-spacing="6" fill="#cfcfcf">MOTO • MARSEILLE</text>
+</svg>
