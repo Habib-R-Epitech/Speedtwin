@@ -67,7 +67,7 @@
         <h1>Entretien<br><span class="text-accent" style="font-style:italic;">à la mesure</span> de votre machine.</h1>
         <p class="lead mt-2">
           Toutes les prestations d'un atelier mécanique premium, sans le tarif d'une concession.
-          Tarifs forfaitaires affichés, devis signé avant intervention, restitution photo et carnet d'entretien numérique.
+          Devis détaillé envoyé sous 24 h, signé avant toute intervention, restitution photo et carnet d'entretien numérique.
         </p>
       </div>
     </section>
@@ -269,10 +269,7 @@
           '<ul style="padding-left:18px;margin-top:12px;color:var(--color-text-dim);font-size:0.92rem;">' +
             s.includes.slice(0,4).map(i => '<li>' + i + '</li>').join('') +
           '</ul>' +
-          (s.priceFrom > 0
-            ? '<div class="card__price"><small>à partir de</small>' + s.priceFrom + ' €</div>'
-            : '<div class="card__price"><small>sur</small>devis</div>') +
-          '<a href="rendez-vous.html?service=' + s.id + '" class="btn btn--ghost btn--block mt-3">Réserver</a>';
+          '<a href="rendez-vous.html?service=' + s.id + '" class="btn btn--ghost btn--block mt-3">Réserver cette prestation</a>';
         sg.appendChild(card);
       });
     }

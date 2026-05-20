@@ -120,7 +120,7 @@
     c.dataset.value = s.id;
     c.innerHTML =
       '<strong>' + s.title + '</strong>' +
-      '<small>' + s.duration + (s.priceFrom > 0 ? ' • à partir de ' + s.priceFrom + ' €' : ' • sur devis') + '</small>';
+      '<small>Durée estimée : ' + s.duration + '</small>';
     c.addEventListener("click", () => {
       const i = state.services.indexOf(s.id);
       if (i >= 0) state.services.splice(i, 1);
@@ -130,58 +130,118 @@
     serviceGrid.appendChild(c);
   });
 
-  /* ----- Étape 4 : Date & créneau ----- */
+  /* ----- Étape 4 : Vue semaine ----- */
   const datePanel = root.querySelector("[data-panel=date]");
-  const dateInput = datePanel.querySelector("[name=date]");
-  const slotGrid = datePanel.querySelector(".slot-grid");
+  const weekTitle = datePanel.querySelector("[data-week-title]");
+  const weekGrid = datePanel.querySelector("[data-week-grid]");
+  const btnWeekPrev = datePanel.querySelector("[data-week-prev]");
+  const btnWeekNext = datePanel.querySelector("[data-week-next]");
 
-  const now = new Date();
-  const min = new Date(now.getTime() + 24 * 3600 * 1000);
-  const max = new Date(now.getTime() + 60 * 24 * 3600 * 1000);
-  dateInput.min = min.toISOString().split("T")[0];
-  dateInput.max = max.toISOString().split("T")[0];
-  dateInput.value = min.toISOString().split("T")[0];
+  const DAY_NAMES = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+  const MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
 
-  function renderSlots() {
-    slotGrid.innerHTML = "";
-    if (!dateInput.value) return;
-    const d = new Date(dateInput.value + "T00:00");
-    const day = d.getDay();
-    const slots = DATA.slots.days[day];
-    if (!slots) {
-      slotGrid.innerHTML = '<p class="text-dim" style="grid-column:1/-1;text-align:center;padding:24px;">Atelier fermé ce jour-là. Mardi au samedi uniquement.</p>';
-      state.slot = null;
-      return;
-    }
-    slots.forEach((time) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "slot";
-      btn.textContent = time;
-      btn.dataset.value = time;
-      // Pseudo-aléatoire : quelques créneaux indisponibles selon la date pour réalisme
-      const hash = (d.getDate() * 31 + parseInt(time.replace(":", ""), 10)) % 7;
-      if (hash === 0) {
-        btn.disabled = true;
-        btn.classList.add("disabled");
-        btn.title = "Créneau déjà réservé";
-      } else {
-        btn.addEventListener("click", () => {
-          state.slot = time;
-          slotGrid.querySelectorAll(".slot").forEach((s) => s.classList.remove("is-selected"));
-          btn.classList.add("is-selected");
-        });
-      }
-      slotGrid.appendChild(btn);
-    });
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const earliest = new Date(today.getTime() + 24 * 3600 * 1000);
+  const latest = new Date(today.getTime() + 60 * 24 * 3600 * 1000);
+
+  // Démarrer la semaine au lundi de la semaine d'earliest
+  function startOfWeek(d) {
+    const x = new Date(d); x.setHours(0, 0, 0, 0);
+    const day = x.getDay(); // 0 = dim, 1 = lun
+    const diff = (day === 0 ? -6 : 1 - day);
+    x.setDate(x.getDate() + diff);
+    return x;
   }
-  dateInput.addEventListener("change", () => {
-    state.date = dateInput.value;
-    state.slot = null;
-    renderSlots();
+  let weekStart = startOfWeek(earliest);
+
+  function fmtDate(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function sameDay(a, b) {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+
+  function renderWeek() {
+    const end = new Date(weekStart); end.setDate(weekStart.getDate() + 6);
+    weekTitle.textContent =
+      "Semaine du " + weekStart.getDate() + " " + MONTHS[weekStart.getMonth()] +
+      " au " + end.getDate() + " " + MONTHS[end.getMonth()] + " " + end.getFullYear();
+
+    btnWeekPrev.disabled = weekStart <= startOfWeek(earliest);
+    btnWeekNext.disabled = weekStart >= startOfWeek(latest);
+
+    weekGrid.innerHTML = "";
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(weekStart); d.setDate(weekStart.getDate() + i);
+      const iso = fmtDate(d);
+      const day = d.getDay();
+      const slots = DATA.slots.days[day];
+      const isPast = d < earliest;
+      const isToday = sameDay(d, today);
+
+      const card = document.createElement("div");
+      card.className = "week__day" + (isToday ? " week__day--today" : "");
+      if (!slots || isPast || d > latest) card.classList.add("week__day--closed");
+
+      const head = document.createElement("h4");
+      head.innerHTML = DAY_NAMES[day] + '<small>' + d.getDate() + "</small>";
+      card.appendChild(head);
+
+      const slotsBox = document.createElement("div");
+      slotsBox.className = "week__slots";
+
+      if (!slots || isPast || d > latest) {
+        const closed = document.createElement("span");
+        closed.className = "week__closed";
+        closed.textContent = !slots ? "Fermé" : (isPast ? "Passé" : "Indispo.");
+        slotsBox.appendChild(closed);
+      } else {
+        let available = 0;
+        slots.forEach((time) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "slot";
+          btn.textContent = time;
+          // Pseudo-disponibilité déterministe pour la démo
+          const hash = (d.getDate() * 31 + parseInt(time.replace(":", ""), 10)) % 7;
+          if (hash === 0) {
+            btn.disabled = true;
+            btn.classList.add("disabled");
+            btn.title = "Créneau déjà réservé";
+          } else {
+            available++;
+            if (state.date === iso && state.slot === time) btn.classList.add("is-selected");
+            btn.addEventListener("click", () => {
+              state.date = iso;
+              state.slot = time;
+              weekGrid.querySelectorAll(".slot").forEach((s) => s.classList.remove("is-selected"));
+              btn.classList.add("is-selected");
+            });
+          }
+          slotsBox.appendChild(btn);
+        });
+        const count = document.createElement("span");
+        count.className = "week__count";
+        count.textContent = available + " créneau" + (available > 1 ? "x" : "");
+        slotsBox.appendChild(count);
+      }
+
+      card.appendChild(slotsBox);
+      weekGrid.appendChild(card);
+    }
+  }
+
+  btnWeekPrev.addEventListener("click", () => {
+    const ns = new Date(weekStart); ns.setDate(weekStart.getDate() - 7);
+    if (ns >= startOfWeek(earliest)) { weekStart = ns; renderWeek(); }
   });
-  state.date = dateInput.value;
-  renderSlots();
+  btnWeekNext.addEventListener("click", () => {
+    const ns = new Date(weekStart); ns.setDate(weekStart.getDate() + 7);
+    if (ns <= startOfWeek(latest)) { weekStart = ns; renderWeek(); }
+  });
+
+  renderWeek();
 
   /* ----- Étape 5 : Coordonnées + résumé ----- */
   const contactPanel = root.querySelector("[data-panel=contact]");
@@ -196,7 +256,6 @@
     const services = state.services
       .map((id) => DATA.services.find((s) => s.id === id))
       .filter(Boolean);
-    const total = services.reduce((acc, s) => acc + (s.priceFrom || 0), 0);
     const dateStr = state.date
       ? new Date(state.date + "T00:00").toLocaleDateString("fr-FR", {
           weekday: "long",
@@ -212,8 +271,7 @@
       '<dt>Kilométrage</dt><dd>' + (state.km ? state.km + " km" : "—") + '</dd>' +
       '<dt>Prestations</dt><dd>' + (services.length ? services.map((s) => s.title).join(", ") : "—") + '</dd>' +
       '<dt>Date</dt><dd>' + dateStr + '</dd>' +
-      '<dt>Créneau</dt><dd>' + (state.slot || "—") + '</dd>' +
-      '<dt>Estimation</dt><dd>' + (total > 0 ? "À partir de " + total + " €" : "Sur devis") + '</dd>';
+      '<dt>Créneau</dt><dd>' + (state.slot || "—") + '</dd>';
   }
 
   /* ----- Validation par étape ----- */

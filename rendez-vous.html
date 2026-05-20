@@ -111,16 +111,21 @@
             <div class="choice-grid" role="group" aria-label="Choisir les prestations"></div>
           </section>
 
-          <!-- Step 4 : Date -->
+          <!-- Step 4 : Planning de la semaine -->
           <section class="wizard__panel" data-panel="date" aria-labelledby="t4">
-            <h2 id="t4">Quand vous arrange-t-il ?</h2>
-            <p class="text-dim mb-3">Atelier ouvert mardi → samedi. Premier créneau disponible dès demain.</p>
-            <div class="field field--required" style="max-width:280px;">
-              <label for="f-date">Date</label>
-              <input id="f-date" name="date" type="date" required>
+            <h2 id="t4">Choisissez votre créneau</h2>
+            <p class="text-dim mb-3">Atelier ouvert mardi → samedi. Cliquez sur un horaire disponible pour réserver. Les créneaux barrés sont déjà pris.</p>
+
+            <div class="week" role="region" aria-label="Planning de la semaine">
+              <header class="week__head">
+                <span class="week__title" data-week-title>Semaine</span>
+                <div class="week__nav">
+                  <button type="button" data-week-prev aria-label="Semaine précédente">← Préc.</button>
+                  <button type="button" data-week-next aria-label="Semaine suivante">Suiv. →</button>
+                </div>
+              </header>
+              <div class="week__grid" data-week-grid role="radiogroup" aria-label="Créneaux disponibles"></div>
             </div>
-            <h3 class="mt-3" style="font-size:1rem;letter-spacing:1.5px;color:var(--color-text-dim);">Créneaux disponibles</h3>
-            <div class="slot-grid mt-2" role="radiogroup" aria-label="Choisir un créneau"></div>
           </section>
 
           <!-- Step 5 : Contact -->
